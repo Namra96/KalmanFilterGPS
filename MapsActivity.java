@@ -57,16 +57,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
    */
     double KGLat; //kalman gain
     double KGLon; //kalman gain
-    double ErrEst = 0.00007186; // Error in Estimation 8 meter dvs 0,00007186 degrees
-    //double ErrMea = 10; // Error in Measurment 10 meter dvs 0,00008983 degrees
+    double ErrEst = 3; // Error in Estimation 8 meter dvs 0,00007186 degrees
+    double ErrMea = 5; // Error in Measurment 10 meter dvs 0,00008983 degrees
     double preEstLat = 55.6; //Previous Estimated Value
-    double preEstLon = 13; //Previous Estimated Value
+    double preEstLon = 12.99; //Previous Estimated Value
     double outputEstLat; // New estimated value
     double outputEstLon; // New estimated value
     double newErrorEstLat; //new Error Estimation
     double newErrorEstLon; //new Error Estimation
     double identityEst = 1;
-    double degrees = 0.00000898;
+    double degrees = 11.100;
 
     double latitude;
     double longitude;
@@ -83,8 +83,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(1000);//7500 sec use a value for about 10-15 sec for a real app
-        locationRequest.setFastestInterval(500);
+        locationRequest.setInterval(500);//7500 sec use a value for about 10-15 sec for a real app
+        locationRequest.setFastestInterval(250);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
 
@@ -104,8 +104,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         ((TextView) (findViewById(R.id.lastlocationfield))).setText("Latitude: " + String.valueOf(location.getLatitude()) +
                                 " Longitude" + String.valueOf(location.getLongitude()));
-                      //  preEstLat = location.getLatitude();
-                      //  preEstLon = location.getLongitude();
+
+                        preEstLat = location.getLatitude()-0.0003717817536;
+                        preEstLon = location.getLongitude()-0.0001141589793;
 
                     }
 
@@ -127,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Log.d("Callback", String.valueOf(i));
                         ((TextView) (findViewById(R.id.lastlocationfield))).setText("Latitude: " + String.valueOf(location.getLatitude()) +
                                 " Longitude" + String.valueOf(location.getLongitude()) + " " + "\n" + i++);
-                        Log.d("Accuracy", String.valueOf(location.getAccuracy()*degrees));
+                       // Log.d("Accuracy", String.valueOf(location.getAccuracy()/degrees));
                         latitude = location.getLatitude();
                         longitude = location.getLongitude();
                         Log.d("Position", "-----------------------------------------------------Viewing current location");
@@ -136,8 +137,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         final LatLng latlon = new LatLng(location.getLatitude(), location.getLongitude());
                         CameraUpdate update = CameraUpdateFactory.newLatLng(latlon);
                         mMap.moveCamera(update);
-                        KalmanGainLat(ErrEst,location.getAccuracy()*degrees);
-                        KalmanGainLon(ErrEst,location.getAccuracy()*degrees);
+                        KalmanGainLat(ErrEst,ErrMea);
+                        KalmanGainLon(ErrEst,ErrMea);
 
                     }
                 }
@@ -231,7 +232,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         KGLon = errEst / (errEst + errMea);
       //  ((TextView)(findViewById(R.id.KalmanLon))).setText("KalmanGain_Longitude" +" " + KGLon);
         newValueLon(this.preEstLon,longitude,KGLon);
-        newValueLon(this.preEstLon,longitude,KGLon);
     }
 
     /*
@@ -247,13 +247,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   Calculate Current Estimated Value
    */
     private void newValueLat(double preEst, double meaValue, double KG) {
-        if (valueLat < 5) {
+        if (valueLat < 2) {
             outputEstLat = preEst + (KG * (meaValue - preEst));
             this.preEstLat = outputEstLat;
             newErrorLat(this.ErrEst, KG);
             valueLat ++;
         }
-        else if (valueLat == 5){
+        else if (valueLat == 2){
             valueLat =0; //kommer fram till en estimated value after 5 iterations
 
         }
@@ -267,13 +267,13 @@ Calculate Current Estimated Value
 */
     private void newValueLon(double preEst, double meaValue, double KG) {
 
-        if (valueLon < 5){
+        if (valueLon < 2){
             outputEstLon = preEst + (KG*(meaValue - preEst));
             this.preEstLon = outputEstLon;
             newErrorLon(this.ErrEst,KG);
             valueLon ++;
         }
-        else if (valueLon == 5){
+        else if (valueLon == 2){
             ((TextView)(findViewById(R.id.textValue))).setText("New_Latitude " + outputEstLat + " New_Longitude " +" " + outputEstLon);
             setUpdatedpos();
             valueLon = 0;
