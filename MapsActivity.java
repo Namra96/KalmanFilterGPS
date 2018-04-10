@@ -87,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationRequest.setFastestInterval(500);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -103,7 +104,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         ((TextView) (findViewById(R.id.lastlocationfield))).setText("Latitude: " + String.valueOf(location.getLatitude()) +
                                 " Longitude" + String.valueOf(location.getLongitude()));
-
+                      //  preEstLat = location.getLatitude();
+                      //  preEstLon = location.getLongitude();
 
                     }
 
@@ -228,6 +230,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         KGLon = errEst / (errEst + errMea);
       //  ((TextView)(findViewById(R.id.KalmanLon))).setText("KalmanGain_Longitude" +" " + KGLon);
+        newValueLon(this.preEstLon,longitude,KGLon);
         newValueLon(this.preEstLon,longitude,KGLon);
     }
 
